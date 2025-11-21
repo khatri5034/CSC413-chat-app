@@ -7,7 +7,8 @@ Open back-end via intelij
 Run both together + mongodb in order to get full stack project running
 
 ## Team members
-Ian Kligman
+Ian Kligman : Friends list
+Philip Chen : Send Images
 
 - Add name
 - Add feature

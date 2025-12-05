@@ -9,6 +9,7 @@ Run both together + mongodb in order to get full stack project running
 ## Team members
 Ian Kligman : Friends list
 Philip Chen : Send Images
+Joshua Gonzalez : Block List
 
 - Add name
 - Add feature

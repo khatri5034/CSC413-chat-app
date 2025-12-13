@@ -18,6 +18,12 @@ public class HandlerFactory {
                 return new LoginHandler();
             case "/getUser":
                 return new GetUserHandler();
+            case "/addFriend":
+                return new AddFriendHandler();
+            case "/removeFriend":
+                return new RemoveFriendHandler();
+            case "/getFriends":
+                return new GetFriendsHandler();
             default:
                 return new FallbackHandler();
         }

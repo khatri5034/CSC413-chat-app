@@ -2,6 +2,9 @@ package dto;
 
 import org.bson.Document;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserDto extends BaseDto {
 
     private String userName;
@@ -9,17 +12,21 @@ public class UserDto extends BaseDto {
     private Integer totalConversations = 0;
     private Integer messagesSent = 0;
     private Integer messagesRecieved = 0;
+    private List<String> friends = new ArrayList<>();
 
     public UserDto() {
         super();
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void fromDocument(Document document) {
         this.userName = document.getString("userName");
         this.password = document.getString("password");
         this.messagesRecieved = document.getInteger("messagesReceived");
         this.messagesSent = document.getInteger("messagesSent");
+        List<String> friendsList = (List<String>) document.get("friends");
+        this.friends = friendsList != null ? new ArrayList<>(friendsList) : new ArrayList<>();
     }
 
     @Override
@@ -28,7 +35,8 @@ public class UserDto extends BaseDto {
                 .append("messagesSent", messagesSent)
                 .append("messagesReceived", messagesRecieved)
                 .append("userName", userName)
-                .append("password", password);
+                .append("password", password)
+                .append("friends", friends);
         return doc;
     }
 
@@ -77,6 +85,15 @@ public class UserDto extends BaseDto {
 
     public UserDto setMessagesRecieved(Integer messagesRecieved) {
         this.messagesRecieved = messagesRecieved;
+        return this;
+    }
+
+    public List<String> getFriends() {
+        return friends;
+    }
+
+    public UserDto setFriends(List<String> friends) {
+        this.friends = friends;
         return this;
     }
 }

@@ -23,13 +23,11 @@ interface MessageDto {
 
 export default function ChatBar({ currentUser, targetUser }: Props) {
   const [messages, setMessages] = React.useState<MessageDto[]>([]);
-  // recipient input removed; use targetUserInput state instead
   const [text, setText] = React.useState('');
   const messagesRef = React.useRef<HTMLDivElement | null>(null);
-  if (!currentUser || !targetUser) return;
 
-  const ids = [currentUser, targetUser].slice().sort();
-  const conversationId = `${ids[0]}_${ids[1]}`;
+  const ids = currentUser && targetUser ? [currentUser, targetUser].slice().sort() : [];
+  const conversationId = ids.length === 2 ? `${ids[0]}_${ids[1]}` : '';
 
   React.useEffect(() => {
     if (messagesRef.current) {
@@ -37,32 +35,32 @@ export default function ChatBar({ currentUser, targetUser }: Props) {
     }
   }, [messages]);
 
-  async function loadConversation() {
-    try {
-      const res = await fetch(`/api/getConversation?conversationId=${encodeURIComponent(conversationId)}`);
-      if (!res.ok) {
-        console.error('Failed to load conversation', await res.text());
-        return;
+  React.useEffect(() => {
+    if (!conversationId) return;
+    
+    async function loadConversation() {
+      try {
+        const res = await fetch(`/api/getConversation?conversationId=${encodeURIComponent(conversationId)}`);
+        if (!res.ok) {
+          console.error('Failed to load conversation', await res.text());
+          return;
+        }
+        const data = await res.json();
+        setMessages(data.data || []);
+      } catch (err) {
+        console.error('Error loading conversation', err);
       }
-      const data = await res.json();
-      setMessages(data.data);
-    } catch (err) {
-      console.error('Error loading conversation', err);
     }
+    
+    loadConversation();
+  }, [conversationId]);
+
+  if (!currentUser || !targetUser) {
+    return null;
   }
 
-
-  // load conversation when currentUser or targetUserInput changes
-  React.useEffect(() => {
-
-    loadConversation();
-  }, [currentUser]);
-
   async function send() {
-
-    // compute conversation id for this pair
-    const ids = [currentUser || '', targetUser || ''].slice().sort();
-    const conversationId = `${ids[0]}_${ids[1]}`;
+    if (!text.trim()) return;
 
     const payload: MessageDto = {
       toId: targetUser || '',
@@ -71,15 +69,13 @@ export default function ChatBar({ currentUser, targetUser }: Props) {
       fromId: currentUser,
     };
 
-    // optimistic UI message while waiting for server
-    const optimistic = {
-      from: currentUser || 'me',
-      to: targetUser || '',
-      text: text.trim(),
-      time: new Date().toLocaleTimeString(),
-    } as MessageDto;
-
-    loadConversation();
+    // Add optimistic message immediately
+    const optimisticMsg: MessageDto = {
+      fromId: currentUser,
+      toId: targetUser || '',
+      message: text.trim(),
+    };
+    setMessages((prev) => [...prev, optimisticMsg]);
     setText('');
 
     try {
@@ -90,31 +86,12 @@ export default function ChatBar({ currentUser, targetUser }: Props) {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        // map server response to UI-friendly shape
-        const serverMsg: MessageDto = {
-          from: data.from || data.fromId || currentUser || 'me',
-          to: data.to || data.toId || targetUser || '',
-          text: data.text || data.message || payload.message,
-          time: data.time || data.createdAt || new Date().toLocaleTimeString(),
-          // keep any ids returned
-          fromId: data.fromId || payload.fromId,
-          toId: data.toId || payload.toId,
-          uniqueId: data.uniqueId || data.id,
-        };
-
-        // replace the optimistic message with server message
-        setMessages((prev) => {
-          const copy = [...prev];
-          // find last optimistic message matching text and recipient
-          const idx = copy.findLastIndex((m) => (m.text || m.message) === optimistic.text && (m.to || m.toId) === optimistic.to);
-          if (idx !== -1) {
-            copy[idx] = serverMsg;
-          } else {
-            copy.push(serverMsg);
-          }
-          return copy;
-        });
+        // Reload conversation to get all messages from server
+        const convRes = await fetch(`/api/getConversation?conversationId=${encodeURIComponent(conversationId)}`);
+        if (convRes.ok) {
+          const data = await convRes.json();
+          setMessages(data.data || []);
+        }
       } else {
         console.error('Failed to send message', await res.text());
       }

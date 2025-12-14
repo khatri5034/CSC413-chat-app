@@ -3,7 +3,9 @@ package handler;
 import auth.AuthFilter;
 import dao.ConversationDao;
 import dao.MessageDao;
+import dao.UserDao;
 import dto.ConversationDto;
+import dto.MessageDto;
 import org.bson.Document;
 import request.ParsedRequest;
 import response.ResponseBuilder;
@@ -37,10 +39,33 @@ public class DeleteMessageHandler implements BaseHandler {
             
             MessageDao messageDao = MessageDao.getInstance();
             ConversationDao conversationDao = ConversationDao.getInstance();
+            UserDao userDao = UserDao.getInstance();
             
-            // Delete the specific message by conversationId and timestamp
+            // Get the message to know who sent/received it
             Document criteria = new Document("conversationId", conversationId)
                     .append("timestamp", timestamp);
+            var messages = messageDao.queryByMultiple(criteria);
+            
+            if (!messages.isEmpty()) {
+                MessageDto message = messages.get(0);
+                String fromId = message.getFromId();
+                String toId = message.getToId();
+                
+                // Decrease counts by 1
+                var fromUser = userDao.query("userName", fromId).stream().findFirst().orElse(null);
+                var toUser = userDao.query("userName", toId).stream().findFirst().orElse(null);
+                
+                if (fromUser != null) {
+                    fromUser.setMessagesSent(Math.max(0, fromUser.getMessagesSent() - 1));
+                    userDao.put(fromUser);
+                }
+                if (toUser != null) {
+                    toUser.setMessagesRecieved(Math.max(0, toUser.getMessagesRecieved() - 1));
+                    userDao.put(toUser);
+                }
+            }
+            
+            // Delete the message
             messageDao.deleteByMultiple(criteria);
             
             // Update conversation message count

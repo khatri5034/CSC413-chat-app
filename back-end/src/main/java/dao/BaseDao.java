@@ -45,5 +45,18 @@ public abstract class BaseDao<T extends BaseDto> {
         collection.deleteMany(criteria);
     }
 
+    public List<T> queryByMultiple(Document criteria) {
+        return collection.find(criteria)
+                .into(new ArrayList<>())
+                .stream()
+                .map(doc -> {
+                    var supplier = getFromDocument(doc);
+                    var dto = supplier.get();
+                    dto.loadUniqueId(doc);
+                    return dto;
+                })
+                .toList();
+    }
+
     abstract Supplier<T> getFromDocument(Document document);
 }

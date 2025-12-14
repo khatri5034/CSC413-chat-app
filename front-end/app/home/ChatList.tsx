@@ -13,16 +13,16 @@ interface ConversationDto {
 interface Props {
   currentUser?: string;
   onOpenChat: (username: string) => void;
+  onUserUpdate?: () => void;
 }
 
-export default function ChatList({ currentUser, onOpenChat }: Props) {
+export default function ChatList({ currentUser, onOpenChat, onUserUpdate }: Props) {
   const [threads, setThreads] = React.useState<ConversationDto[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [newUser, setNewUser] = React.useState("");
-  const [deletingId, setDeletingId] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
+  const loadConversations = React.useCallback(() => {
     if (!currentUser) {
       setThreads([]);
       return;
@@ -53,6 +53,10 @@ export default function ChatList({ currentUser, onOpenChat }: Props) {
       .finally(() => setLoading(false));
   }, [currentUser]);
 
+  React.useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
+
   
 
   const handleOpen = (username: string) => {
@@ -73,31 +77,6 @@ export default function ChatList({ currentUser, onOpenChat }: Props) {
     const parts = name.split(/\s+/);
     const initials = parts.length === 1 ? parts[0].slice(0, 2) : (parts[0][0] + parts[1][0]);
     return initials.toUpperCase();
-  };
-
-  const handleDelete = async (e: React.MouseEvent, conversationId: string) => {
-    e.stopPropagation();
-    if (!conversationId || deletingId) return;
-
-    setDeletingId(conversationId);
-    try {
-      const res = await fetch(`/api/deleteChat?conversationId=${encodeURIComponent(conversationId)}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      
-      if (data.status) {
-        //reload the conversations
-        setThreads(threads.filter(t => t.conversationId !== conversationId));
-      } else {
-        setError(data.message || 'Failed to delete chat');
-      }
-    } catch (err) {
-      console.error(err);
-      setError('Failed to delete chat');
-    } finally {
-      setDeletingId(null);
-    }
   };
 
   return (
@@ -228,22 +207,6 @@ export default function ChatList({ currentUser, onOpenChat }: Props) {
                         {unread}
                       </div>
                     ) : null}
-                    <button
-                      onClick={(e) => handleDelete(e, t.conversationId)}
-                      disabled={deletingId === t.conversationId}
-                      style={{
-                        padding: '6px 12px',
-                        borderRadius: 8,
-                        border: '1px solid #fecaca',
-                        background: deletingId === t.conversationId ? '#f3f4f6' : '#fef2f2',
-                        color: '#dc2626',
-                        fontSize: 13,
-                        fontWeight: 500,
-                        cursor: deletingId === t.conversationId ? 'not-allowed' : 'pointer',
-                      }}
-                    >
-                      {deletingId === t.conversationId ? '...' : 'Delete'}
-                    </button>
                   </div>
                 </li>
               );

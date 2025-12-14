@@ -33,6 +33,16 @@ Add short description to readme on what handler/method each team member worked o
     JOSHUA GONZALEZ:
 
     KIRAN KHATRI:
+        + Added DeleteMessageHandler to delete individual messages and update user message counts
+        + Added queryByMultiple method to BaseDao.java for querying with multiple criteria
+        + Added delete functionality to ChatBar.tsx (delete individual messages)
+        + Updated page.tsx to auto-refresh user stats (messagesSent/messagesReceived) after delete operations
+        + Added route in HandlerFactory for /deleteMessage
+
+        The delete functionality allows users to:
+        - Delete individual messages from conversations (only messages they sent)
+        - Automatically updates user statistics (messagesSent/messagesReceived) when messages are deleted
+        - Frontend automatically refreshes user stats without page reload
 
 Video Demos:
     IAN KLIGMAN (Friends List) : https://www.youtube.com/watch?v=h85DVJskR74

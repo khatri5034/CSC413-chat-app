@@ -6,6 +6,7 @@ interface Props {
   currentUser?: string;
   // optional username to open when ChatBar mounts or changes
   targetUser?: string;
+  onUserUpdate?: () => void;
 }
 
 interface MessageDto {
@@ -22,7 +23,7 @@ interface MessageDto {
   time?: string;
 }
 
-export default function ChatBar({ currentUser, targetUser }: Props) {
+export default function ChatBar({ currentUser, targetUser, onUserUpdate }: Props) {
   const [messages, setMessages] = React.useState<MessageDto[]>([]);
   const [text, setText] = React.useState('');
   const [deletingTimestamp, setDeletingTimestamp] = React.useState<number | null>(null);
@@ -89,6 +90,8 @@ export default function ChatBar({ currentUser, targetUser }: Props) {
       if (res.ok) {
         // Reload conversation to get all messages from server
         loadConversation();
+        // Refresh user stats (messagesSent/messagesReceived)
+        onUserUpdate?.();
       } else {
         console.error('Failed to send message', await res.text());
       }
@@ -110,6 +113,8 @@ export default function ChatBar({ currentUser, targetUser }: Props) {
       
       if (data.status) {
         loadConversation();
+        // Refresh user stats after deleting message
+        onUserUpdate?.();
       } else {
         console.error('Failed to delete message', data.message);
       }

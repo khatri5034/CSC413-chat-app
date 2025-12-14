@@ -19,7 +19,7 @@ export default function Home() {
   const [loading, setLoading] = React.useState(true);
   const [activeChatUser, setActiveChatUser] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
+  const loadUser = React.useCallback(() => {
     fetch("/api/getUser")
       .then((res) => res.json())
       .then((apiRes) => {
@@ -31,6 +31,10 @@ export default function Home() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  React.useEffect(() => {
+    loadUser();
+  }, [loadUser]);
 
   const formatNumber = (n?: number) => (typeof n === 'number' ? n.toLocaleString() : '—');
 
@@ -73,7 +77,7 @@ export default function Home() {
       {!activeChatUser && (
         <>
           <FriendsList currentUser={user?.userName} onOpenChat={(username) => setActiveChatUser(username)} />
-          <ChatList currentUser={user?.userName} onOpenChat={(username) => setActiveChatUser(username)} />
+          <ChatList currentUser={user?.userName} onOpenChat={(username) => setActiveChatUser(username)} onUserUpdate={loadUser} />
         </>
       )}
 
@@ -85,7 +89,7 @@ export default function Home() {
               Back to chats
             </button>
           </div>
-          <ChatBar currentUser={user?.userName} targetUser={activeChatUser} />
+          <ChatBar currentUser={user?.userName} targetUser={activeChatUser} onUserUpdate={loadUser} />
         </div>
       ) : null}
     </div>

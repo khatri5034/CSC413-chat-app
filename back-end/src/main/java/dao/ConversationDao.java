@@ -27,6 +27,7 @@ public class ConversationDao extends BaseDao<ConversationDto> {
     }
 
     public static void setInstanceSupplier(Supplier<ConversationDao> instanceSupplier){
+        ConversationDao.instance = null;
         ConversationDao.instanceSupplier = instanceSupplier;
     }
 

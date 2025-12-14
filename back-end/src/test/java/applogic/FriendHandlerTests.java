@@ -18,7 +18,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FriendHandlerTests {
+public class  FriendHandlerTests {
 
     /**
      * Reset the cached singleton instances before each test.

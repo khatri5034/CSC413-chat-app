@@ -33,6 +33,7 @@ public class AuthDao extends BaseDao<AuthDto> {
     }
 
     public static void setInstanceSupplier(Supplier<AuthDao> instanceSupplier){
+        AuthDao.instance = null;
         AuthDao.instanceSupplier = instanceSupplier;
     }
 }

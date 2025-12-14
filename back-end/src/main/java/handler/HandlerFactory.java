@@ -24,6 +24,10 @@ public class HandlerFactory {
                 return new RemoveFriendHandler();
             case "/getFriends":
                 return new GetFriendsHandler();
+            case "/deleteChat":
+                return new DeleteChatHandler();
+            case "/deleteMessage":
+                return new DeleteMessageHandler();
             default:
                 return new FallbackHandler();
         }

@@ -37,5 +37,13 @@ public abstract class BaseDao<T extends BaseDto> {
         }
     }
 
+    public void delete(String key, Object value) {
+        collection.deleteMany(new Document(key, value));
+    }
+
+    public void deleteByMultiple(Document criteria) {
+        collection.deleteMany(criteria);
+    }
+
     abstract Supplier<T> getFromDocument(Document document);
 }

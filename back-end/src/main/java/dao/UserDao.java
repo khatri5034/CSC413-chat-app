@@ -27,6 +27,7 @@ public class UserDao extends BaseDao<UserDto> {
     }
 
     public static void setInstanceSupplier(Supplier<UserDao> instanceSupplier){
+        UserDao.instance = null;
         UserDao.instanceSupplier = instanceSupplier;
     }
 

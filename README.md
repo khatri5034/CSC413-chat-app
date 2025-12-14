@@ -45,8 +45,7 @@ Add short description to readme on what handler/method each team member worked o
         - Frontend automatically refreshes user stats without page reload
 
 Video Demos:
-    IAN KLIGMAN (Friends List) : https://www.youtube.com/watch?v=h85DVJskR74  
-    
+    IAN KLIGMAN (Friends List) : https://www.youtube.com/watch?v=h85DVJskR74
     Kiran Khatri (Delete Chat) : https://drive.google.com/file/d/1iJCIjG39moGHNUW9T8g_SGmT3rPYKPhc/view?usp=sharing
 
 

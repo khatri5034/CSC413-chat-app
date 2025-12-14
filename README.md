@@ -16,4 +16,25 @@ Kiran Khatri : Delete Chat
 - Add feature
 - post recording
 
+Add short description to readme on what handler/method each team member worked on :
+    
+    IAN KLIGMAN:
+        + Added friends list field in UserDto.java
+        + Added handlers: AddFriendHandler, RemoveFriendHandler, GetFriendsHandler (and included routes for each in HandlerFactory)
+        + Added unit tests: FriendHandlerTests
+        + Added FriendsList.tsx for the friends list frontend
+        + Changed page.tsx to integrate FriendsList
+
+        The friends list feature allows users to add other registered users to their own individual friends lists.
+        They can remove a friend at any time. The database keeps track of User's "friends" feild (array)
+
+    PHILIP CHEN:
+
+    JOSHUA GONZALEZ:
+
+    KIRAN KHATRI:
+
+Video Demos:
+    IAN KLIGMAN (Friends List) : https://www.youtube.com/watch?v=h85DVJskR74
+
 

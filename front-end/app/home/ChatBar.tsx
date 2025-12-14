@@ -14,6 +14,7 @@ interface MessageDto {
   message?: string;
   conversationId?: string;
   uniqueId?: string;
+  timestamp?: number;
   // ui helpers
   from?: string;
   to?: string;
@@ -24,10 +25,26 @@ interface MessageDto {
 export default function ChatBar({ currentUser, targetUser }: Props) {
   const [messages, setMessages] = React.useState<MessageDto[]>([]);
   const [text, setText] = React.useState('');
+  const [deletingTimestamp, setDeletingTimestamp] = React.useState<number | null>(null);
   const messagesRef = React.useRef<HTMLDivElement | null>(null);
 
   const ids = currentUser && targetUser ? [currentUser, targetUser].slice().sort() : [];
   const conversationId = ids.length === 2 ? `${ids[0]}_${ids[1]}` : '';
+
+  const loadConversation = React.useCallback(async () => {
+    if (!conversationId) return;
+    try {
+      const res = await fetch(`/api/getConversation?conversationId=${encodeURIComponent(conversationId)}`);
+      if (!res.ok) {
+        console.error('Failed to load conversation', await res.text());
+        return;
+      }
+      const data = await res.json();
+      setMessages(data.data || []);
+    } catch (err) {
+      console.error('Error loading conversation', err);
+    }
+  }, [conversationId]);
 
   React.useEffect(() => {
     if (messagesRef.current) {
@@ -36,24 +53,8 @@ export default function ChatBar({ currentUser, targetUser }: Props) {
   }, [messages]);
 
   React.useEffect(() => {
-    if (!conversationId) return;
-    
-    async function loadConversation() {
-      try {
-        const res = await fetch(`/api/getConversation?conversationId=${encodeURIComponent(conversationId)}`);
-        if (!res.ok) {
-          console.error('Failed to load conversation', await res.text());
-          return;
-        }
-        const data = await res.json();
-        setMessages(data.data || []);
-      } catch (err) {
-        console.error('Error loading conversation', err);
-      }
-    }
-    
     loadConversation();
-  }, [conversationId]);
+  }, [loadConversation]);
 
   if (!currentUser || !targetUser) {
     return null;
@@ -87,16 +88,35 @@ export default function ChatBar({ currentUser, targetUser }: Props) {
 
       if (res.ok) {
         // Reload conversation to get all messages from server
-        const convRes = await fetch(`/api/getConversation?conversationId=${encodeURIComponent(conversationId)}`);
-        if (convRes.ok) {
-          const data = await convRes.json();
-          setMessages(data.data || []);
-        }
+        loadConversation();
       } else {
         console.error('Failed to send message', await res.text());
       }
     } catch (err) {
       console.error('Network error sending message', err);
+    }
+  }
+
+  async function handleDeleteMessage(timestamp: number) {
+    if (!timestamp || deletingTimestamp === timestamp) return;
+    
+    setDeletingTimestamp(timestamp);
+    try {
+      const res = await fetch(
+        `/api/deleteMessage?conversationId=${encodeURIComponent(conversationId)}&timestamp=${timestamp}`,
+        { method: 'DELETE' }
+      );
+      const data = await res.json();
+      
+      if (data.status) {
+        loadConversation();
+      } else {
+        console.error('Failed to delete message', data.message);
+      }
+    } catch (err) {
+      console.error('Error deleting message', err);
+    } finally {
+      setDeletingTimestamp(null);
     }
   }
 
@@ -119,11 +139,44 @@ export default function ChatBar({ currentUser, targetUser }: Props) {
           <div style={{ color: '#666' }}>No messages yet.</div>
         ) : (
           messages.map((m, i) => (
-            <div key={i} style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 12, color: '#666' }}>
-                {(m.time || '')} • {(m.from || m.fromId)} → {(m.to || m.toId)}
+            <div 
+              key={i} 
+              style={{ 
+                marginBottom: 8, 
+                padding: 8, 
+                background: '#fff', 
+                borderRadius: 6,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: 8
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, color: '#666' }}>
+                  {(m.time || '')} • {(m.from || m.fromId)} → {(m.to || m.toId)}
+                </div>
+                <div>{m.text || m.message}</div>
               </div>
-              <div>{m.text || m.message}</div>
+              {m.timestamp && currentUser === m.fromId && (
+                <button
+                  onClick={() => handleDeleteMessage(m.timestamp!)}
+                  disabled={deletingTimestamp === m.timestamp}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: 4,
+                    border: '1px solid #fecaca',
+                    background: deletingTimestamp === m.timestamp ? '#f3f4f6' : '#fef2f2',
+                    color: '#dc2626',
+                    fontSize: 11,
+                    fontWeight: 500,
+                    cursor: deletingTimestamp === m.timestamp ? 'not-allowed' : 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {deletingTimestamp === m.timestamp ? '...' : 'Delete'}
+                </button>
+              )}
             </div>
           ))
         )}

@@ -20,6 +20,7 @@ export default function ChatList({ currentUser, onOpenChat }: Props) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [newUser, setNewUser] = React.useState("");
+  const [deletingId, setDeletingId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!currentUser) {
@@ -52,6 +53,8 @@ export default function ChatList({ currentUser, onOpenChat }: Props) {
       .finally(() => setLoading(false));
   }, [currentUser]);
 
+  
+
   const handleOpen = (username: string) => {
     if (!username) return;
     onOpenChat(username);
@@ -70,6 +73,31 @@ export default function ChatList({ currentUser, onOpenChat }: Props) {
     const parts = name.split(/\s+/);
     const initials = parts.length === 1 ? parts[0].slice(0, 2) : (parts[0][0] + parts[1][0]);
     return initials.toUpperCase();
+  };
+
+  const handleDelete = async (e: React.MouseEvent, conversationId: string) => {
+    e.stopPropagation();
+    if (!conversationId || deletingId) return;
+
+    setDeletingId(conversationId);
+    try {
+      const res = await fetch(`/api/deleteChat?conversationId=${encodeURIComponent(conversationId)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      
+      if (data.status) {
+        //reload the conversations
+        setThreads(threads.filter(t => t.conversationId !== conversationId));
+      } else {
+        setError(data.message || 'Failed to delete chat');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Failed to delete chat');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -153,7 +181,7 @@ export default function ChatList({ currentUser, onOpenChat }: Props) {
                     (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 6px rgba(16,24,40,0.04)';
                   }}
                 >
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 1 }}>
                     <div
                       style={{
                         width: 44,
@@ -172,7 +200,7 @@ export default function ChatList({ currentUser, onOpenChat }: Props) {
                       {getInitials(withUser)}
                     </div>
 
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 15 }}>{withUser}</div>
                       {t.lastMessage && (
                         <div style={{ color: "#666", fontSize: 13, marginTop: 4, maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -182,23 +210,41 @@ export default function ChatList({ currentUser, onOpenChat }: Props) {
                     </div>
                   </div>
 
-                  {typeof unread === 'number' && unread > 0 ? (
-                    <div
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    {typeof unread === 'number' && unread > 0 ? (
+                      <div
+                        style={{
+                          background: '#ef4444',
+                          color: 'white',
+                          padding: '6px 10px',
+                          borderRadius: 9999,
+                          fontSize: 12,
+                          minWidth: 30,
+                          textAlign: 'center',
+                          fontWeight: 700,
+                          boxShadow: '0 6px 12px rgba(239,68,68,0.12)',
+                        }}
+                      >
+                        {unread}
+                      </div>
+                    ) : null}
+                    <button
+                      onClick={(e) => handleDelete(e, t.conversationId)}
+                      disabled={deletingId === t.conversationId}
                       style={{
-                        background: '#ef4444',
-                        color: 'white',
-                        padding: '6px 10px',
-                        borderRadius: 9999,
-                        fontSize: 12,
-                        minWidth: 30,
-                        textAlign: 'center',
-                        fontWeight: 700,
-                        boxShadow: '0 6px 12px rgba(239,68,68,0.12)',
+                        padding: '6px 12px',
+                        borderRadius: 8,
+                        border: '1px solid #fecaca',
+                        background: deletingId === t.conversationId ? '#f3f4f6' : '#fef2f2',
+                        color: '#dc2626',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        cursor: deletingId === t.conversationId ? 'not-allowed' : 'pointer',
                       }}
                     >
-                      {unread}
-                    </div>
-                  ) : null}
+                      {deletingId === t.conversationId ? '...' : 'Delete'}
+                    </button>
+                  </div>
                 </li>
               );
             })}

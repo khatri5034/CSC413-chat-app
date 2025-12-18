@@ -31,6 +31,14 @@ Add short description to readme on what handler/method each team member worked o
     PHILIP CHEN:
 
     JOSHUA GONZALEZ:
+        + Added Blocked list field in UserDto.java
+        + Added handlers: AddBlockedUSerHandler, RemoveBlockedUserHandler, GetBLockedUserHandler (and included routes for each in HandlerFactory)
+        + Added unit tests: BlockedUserHandlerTests
+        + Added BlockedList.tsx for the Block list frontend
+        + Changed page.tsx to integrate BlockeList
+
+        Allows the user to add other users into a blocked list. They can remove them at anytime but cannot
+        add users into their friends list if already blocked.
 
     KIRAN KHATRI:
         + Added DeleteMessageHandler to delete individual messages and update user message counts

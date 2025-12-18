@@ -8,7 +8,7 @@ Run both together + mongodb in order to get full stack project running
 
 ## Team members
 Ian Kligman : Friends list
-Philip Chen : Send Images
+Philip Chen : Read Receipts
 Joshua Gonzalez : Block List
 Kiran Khatri : Delete Chat 
 
@@ -29,6 +29,18 @@ Add short description to readme on what handler/method each team member worked o
         They can remove a friend at any time. The database keeps track of User's "friends" feild (array)
 
     PHILIP CHEN:
+        + Modified MessageDto.java to add read receipt fields (status, deliveredAt, readAt)
+        + Added handlers: MarkMessageReadHandler, GetMessageReceiptHandler, GetUnreadCountHandler
+        + Added routes in HandlerFactory for: /markMessageRead, /getMessageReceipt, /getUnreadCount
+        + Created ReadReceipts.tsx component to display receipt status with checkmarks
+        + Modified ChatBar.tsx to integrate read receipts and auto-mark messages as read
+        + Modified page.tsx to show unread message count badge with real-time updates
+
+        The read receipts feature allows users to see when their sent messages are delivered 
+        and read. Messages show visual indicators: single checkmark (sent), double gray 
+        checkmark (delivered), double blue checkmark (read). Recipients see an unread count 
+        badge. Messages are automatically marked as read when viewed. Security enforced: only 
+        recipients can mark messages as read, only senders can view read receipts.
 
     JOSHUA GONZALEZ:
         + Added Blocked list field in UserDto.java

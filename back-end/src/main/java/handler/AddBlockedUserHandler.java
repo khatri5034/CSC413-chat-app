@@ -10,7 +10,7 @@ import response.StatusCodes;
 
 import java.util.List;
 
-public class AddFriendHandler implements BaseHandler {
+public class AddBlockedUserHandler implements BaseHandler {
 
     @Override
     public ResponseBuilder handleRequest(ParsedRequest request) {
@@ -20,19 +20,19 @@ public class AddFriendHandler implements BaseHandler {
             return new ResponseBuilder().setStatus(StatusCodes.UNAUTHORIZED);
         }
 
-        // Parse the request body to get friend's username
-        FriendRequest friendRequest = GsonTool.GSON.fromJson(request.getBody(), FriendRequest.class);
-        if (friendRequest == null || friendRequest.friendUserName == null
-                || friendRequest.friendUserName.trim().isEmpty()) {
-            var res = new RestApiAppResponse<>(false, null, "Friend username is required");
+        // Parse the request body to get blocked user's username
+        BlockedUserRequest blockedUserRequest = GsonTool.GSON.fromJson(request.getBody(), BlockedUserRequest.class);
+        if (blockedUserRequest == null || blockedUserRequest.userName == null
+                || blockedUserRequest.userName.trim().isEmpty()) {
+            var res = new RestApiAppResponse<>(false, null, "Username is required");
             return new ResponseBuilder().setStatus(StatusCodes.BAD_REQUEST).setBody(res);
         }
 
-        String friendUserName = friendRequest.friendUserName.trim();
+        String blockedUserName = blockedUserRequest.userName.trim();
 
-        // Can't add yourself as a friend
-        if (friendUserName.equals(authResult.userName)) {
-            var res = new RestApiAppResponse<>(false, null, "Cannot add yourself as a friend");
+        // Can't block yourself
+        if (blockedUserName.equals(authResult.userName)) {
+            var res = new RestApiAppResponse<>(false, null, "Cannot block yourself");
             return new ResponseBuilder().setStatus(StatusCodes.BAD_REQUEST).setBody(res);
         }
 
@@ -49,31 +49,25 @@ public class AddFriendHandler implements BaseHandler {
             return new ResponseBuilder().setStatus(StatusCodes.BAD_REQUEST).setBody(res);
         }
 
-        // Check if friend exists
-        UserDto friendUser = userDao.query("userName", friendUserName)
+        // Check if blocked user exists
+        UserDto blockedUser = userDao.query("userName", blockedUserName)
                 .stream()
                 .findFirst()
                 .orElse(null);
 
-        if (friendUser == null) {
+        if (blockedUser == null) {
             var res = new RestApiAppResponse<>(false, null, "User not found");
             return new ResponseBuilder().setStatus(StatusCodes.BAD_REQUEST).setBody(res);
         }
 
-        // Check if user is blocked
-        if (currentUser.getBlockedUsers().contains(friendUserName)) {
-            var res = new RestApiAppResponse<>(false, null, "Cannot add blocked user as friend");
+        // Check if already blocked
+        if (currentUser.getBlockedUsers().contains(blockedUserName)) {
+            var res = new RestApiAppResponse<>(false, null, "User is already blocked");
             return new ResponseBuilder().setStatus(StatusCodes.BAD_REQUEST).setBody(res);
         }
 
-        // Check if already friends
-        if (currentUser.getFriends().contains(friendUserName)) {
-            var res = new RestApiAppResponse<>(false, null, "Already friends with this user");
-            return new ResponseBuilder().setStatus(StatusCodes.BAD_REQUEST).setBody(res);
-        }
-
-        // Add friend to list
-        currentUser.getFriends().add(friendUserName);
+        // Add user to block list
+        currentUser.getBlockedUsers().add(blockedUserName);
         userDao.put(currentUser);
 
         var res = new RestApiAppResponse<>(true, List.of(currentUser), null);
@@ -81,8 +75,8 @@ public class AddFriendHandler implements BaseHandler {
     }
 
     // Inner class for parsing request body
-    private static class FriendRequest {
-        String friendUserName;
+    private static class BlockedUserRequest {
+        String userName;
     }
 }
 

@@ -24,6 +24,12 @@ public class HandlerFactory {
                 return new RemoveFriendHandler();
             case "/getFriends":
                 return new GetFriendsHandler();
+            case "/addBlockedUser":
+                return new AddBlockedUserHandler();
+            case "/removeBlockedUser":
+                return new RemoveBlockedUserHandler();
+            case "/getBlockedUsers":
+                return new GetBlockedUsersHandler();
             case "/deleteMessage":
                 return new DeleteMessageHandler();
             default:

@@ -25,6 +25,12 @@ public class RoutingTests {
         Assert.assertTrue(HandlerFactory.getHandler(basicRequest) instanceof GetConversationsHandler);
         basicRequest.setPath("/getConversation");
         Assert.assertTrue(HandlerFactory.getHandler(basicRequest) instanceof GetConversationHandler);
+        basicRequest.setPath("/addBlockedUser");
+        Assert.assertTrue(HandlerFactory.getHandler(basicRequest) instanceof AddBlockedUserHandler);
+        basicRequest.setPath("/removeBlockedUser");
+        Assert.assertTrue(HandlerFactory.getHandler(basicRequest) instanceof RemoveBlockedUserHandler);
+        basicRequest.setPath("/getBlockedUsers");
+        Assert.assertTrue(HandlerFactory.getHandler(basicRequest) instanceof GetBlockedUsersHandler);
     }
 
     @Test

@@ -13,6 +13,7 @@ public class UserDto extends BaseDto {
     private Integer messagesSent = 0;
     private Integer messagesRecieved = 0;
     private List<String> friends = new ArrayList<>();
+    private List<String> blockedUsers = new ArrayList<>();
 
     public UserDto() {
         super();
@@ -27,6 +28,8 @@ public class UserDto extends BaseDto {
         this.messagesSent = document.getInteger("messagesSent");
         List<String> friendsList = (List<String>) document.get("friends");
         this.friends = friendsList != null ? new ArrayList<>(friendsList) : new ArrayList<>();
+        List<String> blockedUsersList = (List<String>) document.get("blockedUsers");
+        this.blockedUsers = blockedUsersList != null ? new ArrayList<>(blockedUsersList) : new ArrayList<>();
     }
 
     @Override
@@ -36,7 +39,8 @@ public class UserDto extends BaseDto {
                 .append("messagesReceived", messagesRecieved)
                 .append("userName", userName)
                 .append("password", password)
-                .append("friends", friends);
+                .append("friends", friends)
+                .append("blockedUsers", blockedUsers);
         return doc;
     }
 
@@ -94,6 +98,15 @@ public class UserDto extends BaseDto {
 
     public UserDto setFriends(List<String> friends) {
         this.friends = friends;
+        return this;
+    }
+
+    public List<String> getBlockedUsers() {
+        return blockedUsers;
+    }
+
+    public UserDto setBlockedUsers(List<String> blockedUsers) {
+        this.blockedUsers = blockedUsers;
         return this;
     }
 }

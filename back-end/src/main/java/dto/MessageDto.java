@@ -12,8 +12,17 @@ public class MessageDto extends BaseDto {
     private Long timestamp;
     private String conversationId;
 
+    // NEW: Read receipt fields
+    private String status;        // "sent", "delivered", "read"
+    private Long deliveredAt;     // timestamp when delivered
+    private Long readAt;          // timestamp when read
+
     public MessageDto() {
         timestamp = Instant.now().toEpochMilli();
+        // NEW: Initialize read receipt fields
+        status = "sent";
+        deliveredAt = null;
+        readAt = null;
     }
 
     @Override
@@ -23,6 +32,16 @@ public class MessageDto extends BaseDto {
         this.message = document.getString("message");
         this.timestamp = document.getLong("timestamp");
         this.conversationId = document.getString("conversationId");
+
+        // NEW: Read receipt fields from document
+        this.status = document.getString("status");
+        this.deliveredAt = document.getLong("deliveredAt");
+        this.readAt = document.getLong("readAt");
+
+        // Handle legacy messages without status field
+        if (this.status == null) {
+            this.status = "sent";
+        }
     }
 
     @Override
@@ -33,6 +52,12 @@ public class MessageDto extends BaseDto {
         doc.append("message", message);
         doc.append("timestamp", timestamp);
         doc.append("conversationId", conversationId);
+
+        // NEW: Add read receipt fields to document
+        doc.append("status", status);
+        doc.append("deliveredAt", deliveredAt);
+        doc.append("readAt", readAt);
+
         return doc;
     }
 
@@ -74,6 +99,31 @@ public class MessageDto extends BaseDto {
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    // NEW: Getters and setters for read receipt fields
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getDeliveredAt() {
+        return deliveredAt;
+    }
+
+    public void setDeliveredAt(Long deliveredAt) {
+        this.deliveredAt = deliveredAt;
+    }
+
+    public Long getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(Long readAt) {
+        this.readAt = readAt;
     }
 
 }

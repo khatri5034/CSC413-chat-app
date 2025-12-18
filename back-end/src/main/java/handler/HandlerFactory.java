@@ -32,6 +32,12 @@ public class HandlerFactory {
                 return new GetBlockedUsersHandler();
             case "/deleteMessage":
                 return new DeleteMessageHandler();
+            case "/markMessageRead":
+                return new MarkMessageReadHandler();
+            case "/getMessageReceipt":
+                return new GetMessageReceiptHandler();
+            case "/getUnreadCount":
+                return new GetUnreadCountHandler();
             default:
                 return new FallbackHandler();
         }

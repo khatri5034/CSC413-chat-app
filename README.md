@@ -68,5 +68,6 @@ Video Demos:
     IAN KLIGMAN (Friends List) : https://www.youtube.com/watch?v=h85DVJskR74 <br> 
     Kiran Khatri (Delete Chat) : https://drive.google.com/file/d/1iJCIjG39moGHNUW9T8g_SGmT3rPYKPhc/view?usp=sharing
     Joshua Gonzalez (Block List) : https://youtu.be/EqCGC8rMCls
+    Philip Chen (Read Receipts) : https://drive.google.com/file/d/16YewHQHLn83D9a-W1ZwgnnuRo_z9eoFB/view?usp=sharing
 
 
